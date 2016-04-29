@@ -209,10 +209,12 @@ unsafe fn kill_processes(job: &Handle) -> bool {
         // Ok, this isn't mspdbsrv, let's kill the process. After we kill it we
         // wait on it to ensure that the next time around in this function we're
         // not going to see it again.
-        status!("\tkilling still-running process");
         let r = TerminateProcess(p.0, 1);
         if r == 0 {
-            panic!("failed to terminate subprocess {}: {}", id, last_err());
+            status!("\tfailed to kill subprocess {}: {}", id, last_err());
+            status!("\tassuming subprocess is dead...");
+        } else {
+            status!("\tterminated subprocess {}", id);
         }
         let r = WaitForSingleObject(p.0, INFINITE);
         if r != 0 {
